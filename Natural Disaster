@@ -1,0 +1,119 @@
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "Durk Ware|Natural Disaster",
+    SubTitle = "by durk7896",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(480, 360),
+    Acrylic = true, -- The blur may be detectable, setting this to false disables blur entirely
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.K -- Used when theres no MinimizeKeybind
+})
+
+--Fluent provides Lucide Icons https://lucide.dev/icons/ for the tabs, icons are optional
+local Tabs = {
+    Game = Window:AddTab({ Title = "+Tab Game", Icon = "" })
+}
+
+Tabs.Game:AddParagraph({
+    Title = "Durk🦆",
+    Content = "Este script foi desenvolvido com amor e feito para Leaks.\nEste hub so se encontra disponivel nele! ou no site do desenvolvedor"
+})
+
+-- Função para teleportar o jogador
+local function teleportPlayerTo(position)
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    
+    -- Teleporta o jogador para a posição especificada
+    humanoidRootPart.CFrame = CFrame.new(position)
+end
+
+-- Botão 1: Teleportar para as coordenadas (-113, 46, 7)
+Tabs.Game:AddButton({
+    Title = "Teleport to game",
+    Description = "Teleports you to the game area",
+    Callback = function()
+        teleportPlayerTo(Vector3.new(-113, 46, 7))
+        print("Teleported to -113, 46, 7")
+    end    
+})
+
+-- Botão 2: Teleportar para as coordenadas (-310, 178, 311)
+Tabs.Game:AddButton({
+    Title = "Teleport to lobby",
+    Description = "Teleports you to the lobby area",
+    Callback = function()
+        teleportPlayerTo(Vector3.new(-310, 178, 311))
+        print("Teleported to -310, 178, 311")
+    end    
+})
+
+-- Variável para controlar o loop de teleporte
+local teleporting = false
+local createdBlock -- Variável para armazenar o bloco criado
+
+-- Função para teleportar o jogador
+local function teleportPlayerTo(position)
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+    
+    -- Teleporta o jogador para a posição especificada
+    humanoidRootPart.CFrame = CFrame.new(position)
+end
+
+-- Função para criar um bloco ancorado
+local function createAnchoredBlock(position)
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(15, 1, 15) -- Tamanho do bloco
+    part.Position = position -- Define a posição do bloco
+    part.Anchored = true -- Deixa o bloco ancorado
+    part.Parent = workspace -- Adiciona o bloco ao workspace
+    return part -- Retorna a referência do bloco
+end
+
+-- Função para deletar o bloco
+local function deleteBlock()
+    if createdBlock then
+        createdBlock:Destroy()
+        createdBlock = nil
+    end
+end
+
+-- Função para iniciar o teleporte contínuo e criar o bloco
+local function startTeleportLoop()
+    while teleporting do
+        teleportPlayerTo(Vector3.new(0, 197, 0)) -- Teleporta o jogador
+        wait() -- Espera 1 segundo antes de repetir, ajuste conforme necessário
+    end
+end
+
+-- Adiciona o Toggle com a nova estrutura
+local Toggle = Tabs.Game:AddToggle("MyToggle", 
+{
+    Title = "NEVER DIED[TP]", 
+    Description = "Continuously teleport to for a flying platform when disabled click to teleport to game/lobby",
+    Default = false,
+    Callback = function(state)
+        teleporting = state -- Ativa ou desativa o loop de teleporte
+        if teleporting then
+            print("Teleporting started")
+            
+            -- Cria o bloco quando o toggle é ativado
+            createdBlock = createAnchoredBlock(Vector3.new(0, 194, 0))
+            
+            -- Inicia o teleporte contínuo em uma nova thread
+            spawn(startTeleportLoop)
+        else
+            print("Teleporting stopped")
+            
+            -- Deleta o bloco quando o toggle é desativado
+            deleteBlock()
+        end
+    end
+})
+
